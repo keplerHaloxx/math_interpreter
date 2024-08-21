@@ -6,28 +6,33 @@ use crate::{
 };
 
 const DIGITS: &str = ".0123456789";
+const LETTERS: &str = "abcdefghijklmnopqrstuvwxyz";
 
-pub struct Lexer {
-    source: String,
+pub struct Lexer<I: Iterator<Item = char> + Clone> {
+    // source: String,
+    iter: Peekable<I>,
 }
 
-impl Lexer {
-    pub fn new(source: String) -> Self {
-        Self { source }
+impl<I: Iterator<Item = char> + Clone> Lexer<I> {
+    pub fn new(source: I) -> Self {
+        Self {
+            // source,
+            iter: source.peekable(),
+        }
     }
 
-    pub fn tokenize(&self) -> Result<Vec<Token>, ErrorReason> {
+    pub fn tokenize(&mut self) -> Result<Vec<Token>, ErrorReason> {
         let mut tokens: Vec<Token> = Vec::new();
-        let mut chars = self
-            .source
-            .chars()
-            .filter(|c| !c.is_whitespace())
-            .peekable();
 
-        while let Some(&current) = chars.peek() {
-            // Best solution i could find to making sure it doesn't skip
+        // Best solution i could find to making sure it doesn't skip
+        while let Some(&current) = self.iter.peek() {
+            if current.is_ascii_whitespace() {
+                self.iter.next();
+                continue;
+            }
+
             if DIGITS.contains(current) {
-                tokens.push(self.generate_number(&mut chars)?);
+                tokens.push(self.generate_number()?);
             } else {
                 let token = match current {
                     '+' => Token::new(TokenKind::Plus, None),
@@ -37,27 +42,47 @@ impl Lexer {
                     '^' => Token::new(TokenKind::Power, None),
                     '(' => Token::new(TokenKind::LParen, None),
                     ')' => Token::new(TokenKind::RParen, None),
+                    // 'a'..='z' => {}
                     _ => Token::new(
                         TokenKind::Unknown,
                         Some(TokenValue::StrValue(current.to_string())),
                     ),
                 };
                 tokens.push(token);
-                chars.next();
+                self.iter.next();
             }
         }
 
         Ok(tokens)
     }
 
-    fn generate_number<I>(&self, chars: &mut Peekable<I>) -> Result<Token, ErrorReason>
+    fn read_function(&mut self) -> Token {
+        // TODO: read the parameters of function
+        // bruh i cant figure this out rn i do later
+        let mut name = String::new();
+
+        while let Some(&current) = self.iter.peek() {
+            if LETTERS.contains(current) {
+                name.push(current);
+            }
+
+            if current == '(' {
+                self.iter.next(); // Consume '('
+
+            }
+            self.iter.next();
+        }
+        Token::new(TokenKind::Function, Some(TokenValue::FuncParams(name, 0))) // change params later
+    }
+
+    fn generate_number(&mut self) -> Result<Token, ErrorReason>
     where
         I: Iterator<Item = char>,
     {
         let mut decimal_point_counter = 0;
         let mut number = String::new();
 
-        while let Some(&current) = chars.peek() {
+        while let Some(&current) = self.iter.peek() {
             if current == '.' {
                 decimal_point_counter += 1;
                 if decimal_point_counter > 1 {
@@ -65,16 +90,19 @@ impl Lexer {
                 }
             }
             number.push(current);
-            chars.next();
+            self.iter.next();
 
             // Peek the next character and check if it's valid for a number
-            if let Some(&next_char) = chars.peek() {
+            if let Some(&next_char) = self.iter.peek() {
                 if !DIGITS.contains(next_char) {
                     if number.trim() == "." {
-                        return Err(ErrorReason::Error("Random decimal place found ".into()));
+                        return Err(ErrorReason::Error("Invalid sequence".into()));
                     }
                     break;
                 }
+            } else {
+                // this is PROBABLY the error but i cbf actually finding the bugs
+                return Err(ErrorReason::Error("Invalid sequence".into()));
             }
         }
 
