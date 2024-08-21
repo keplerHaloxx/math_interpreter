@@ -9,7 +9,7 @@ use std::io::{stdin, stdout, Write};
 use colored::Colorize;
 use errors::{ErrorReason, ParserError};
 use lexer::Lexer;
-use parser::{ASTNode, Parser};
+use parser::Parser;
 use token::{Token, TokenKind, TokenValue};
 
 /// Prompts user for input and returns trimmed result
@@ -32,7 +32,9 @@ fn main() {
 
         let mut lexer = Lexer::new(input.chars());
         let tokens_result = lexer.tokenize();
+        println!("{:?}", tokens_result);
         if let Err(err) = tokens_result {
+            println!("place 1");
             println!("{}", err);
             continue;
         }
@@ -41,13 +43,11 @@ fn main() {
         let token_errors = get_tokens_errors(tokens.clone());
         if !token_errors.is_empty() {
             for err in token_errors {
+                println!("place 2");
                 println!(
                     "{}",
-                    ParserError::new(ErrorReason::Error(format!(
-                        "Invalid sequence: '{}'",
-                        err
-                    )))
-                    .description
+                    ParserError::new(ErrorReason::Error(format!("Invalid sequence: '{}'", err)))
+                        .description
                 );
             }
             println!();
@@ -57,6 +57,7 @@ fn main() {
             let result = parser.parse_expr();
             // println!("{:?}", result);
             if result.is_err() {
+                println!("place 3");
                 println!("{}", result.unwrap_err().description);
                 continue;
             }

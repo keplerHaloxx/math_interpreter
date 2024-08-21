@@ -6,6 +6,7 @@ use crate::{
 };
 
 const DIGITS: &str = ".0123456789";
+#[allow(unused)]
 const LETTERS: &str = "abcdefghijklmnopqrstuvwxyz";
 
 pub struct Lexer<I: Iterator<Item = char> + Clone> {
@@ -56,6 +57,7 @@ impl<I: Iterator<Item = char> + Clone> Lexer<I> {
         Ok(tokens)
     }
 
+    #[allow(unused)]
     fn read_function(&mut self) -> Token {
         // TODO: read the parameters of function
         // bruh i cant figure this out rn i do later
@@ -68,7 +70,6 @@ impl<I: Iterator<Item = char> + Clone> Lexer<I> {
 
             if current == '(' {
                 self.iter.next(); // Consume '('
-
             }
             self.iter.next();
         }
@@ -94,6 +95,7 @@ impl<I: Iterator<Item = char> + Clone> Lexer<I> {
 
             // Peek the next character and check if it's valid for a number
             if let Some(&next_char) = self.iter.peek() {
+                println!("still ehre");
                 if !DIGITS.contains(next_char) {
                     if number.trim() == "." {
                         return Err(ErrorReason::Error("Invalid sequence".into()));
@@ -101,7 +103,6 @@ impl<I: Iterator<Item = char> + Clone> Lexer<I> {
                     break;
                 }
             } else {
-                // this is PROBABLY the error but i cbf actually finding the bugs
                 return Err(ErrorReason::Error("Invalid sequence".into()));
             }
         }

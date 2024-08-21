@@ -18,6 +18,7 @@ pub enum TokenKind {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenValue {
+    #[allow(unused)]
     FuncParams(String, u8), // function_name, num_of_params
     StrValue(String),
     NumValue(f64),
