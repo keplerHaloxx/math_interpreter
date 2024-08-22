@@ -32,9 +32,7 @@ fn main() {
 
         let mut lexer = Lexer::new(input.chars());
         let tokens_result = lexer.tokenize();
-        println!("{:?}", tokens_result);
         if let Err(err) = tokens_result {
-            println!("place 1");
             println!("{}", err);
             continue;
         }
@@ -43,7 +41,6 @@ fn main() {
         let token_errors = get_tokens_errors(tokens.clone());
         if !token_errors.is_empty() {
             for err in token_errors {
-                println!("place 2");
                 println!(
                     "{}",
                     ParserError::new(ErrorReason::Error(format!("Invalid sequence: '{}'", err)))
@@ -52,12 +49,10 @@ fn main() {
             }
             println!();
         } else {
-            pretty_print_tokens(tokens.clone());
+            // pretty_print_tokens(tokens.clone());
             let mut parser = Parser::new(tokens.into_iter());
             let result = parser.parse_expr();
-            // println!("{:?}", result);
             if result.is_err() {
-                println!("place 3");
                 println!("{}", result.unwrap_err().description);
                 continue;
             }
@@ -70,6 +65,7 @@ fn main() {
     }
 }
 
+#[allow(dead_code)]
 fn pretty_print_tokens(tokens: Vec<Token>) {
     let token_len = tokens.len();
     tokens.iter().enumerate().for_each(|(i, token)| {

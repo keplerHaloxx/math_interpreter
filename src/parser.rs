@@ -110,7 +110,7 @@ impl<I: Iterator<Item = Token>> Parser<I> {
             }
             _ => Err(ParserError::new(ErrorReason::Error(format!(
                 "Unexpected token: {:?}",
-                self.peek()
+                if self.peek().is_some() {self.peek().unwrap().kind} else {TokenKind::Unknown}
             )))),
         }
     }
