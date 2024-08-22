@@ -95,14 +95,13 @@ impl<I: Iterator<Item = char> + Clone> Lexer<I> {
 
             // Peek the next character and check if it's valid for a number
             if let Some(&next_char) = self.iter.peek() {
-                println!("still ehre");
                 if !DIGITS.contains(next_char) {
                     if number.trim() == "." {
                         return Err(ErrorReason::Error("Invalid sequence".into()));
                     }
                     break;
                 }
-            } else {
+            } else if number.trim() == "." {
                 return Err(ErrorReason::Error("Invalid sequence".into()));
             }
         }
